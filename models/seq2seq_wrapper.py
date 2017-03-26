@@ -17,7 +17,7 @@ class Seq2Seq(object):
             xvocab_size, yvocab_size,
             emb_dim, num_layers, ckpt_path,
             lr=0.0001, 
-            epochs=100000, model_name='seq2seq_model'):
+            epochs=100000, model_name='seq2seq_model',attention= False,celltype = 'GRU'):
 
         # attach these arguments to self
         self.xseq_len = xseq_len
@@ -25,7 +25,8 @@ class Seq2Seq(object):
         self.ckpt_path = ckpt_path
         self.epochs = epochs
         self.model_name = model_name
-
+        self.attention = attention
+        self.celltype = celltype
 
         # build thy graph
         #  attach any part of the graph that needs to be exposed, to the self
@@ -53,8 +54,11 @@ class Seq2Seq(object):
             # Basic LSTM cell wrapped in Dropout Wrapper
             self.keep_prob = tf.placeholder(tf.float32)
             # define the basic cell
-            basic_cell = tf.nn.rnn_cell.DropoutWrapper(
-                    tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
+            if self.celltype == 'GRU' :
+                basic_cell = tf.nn.rnn_cell.DropoutWrapper(tf.nn.rnn_cell.GRUCell(emb_dim),output_keep_prob=self.keep_prob)
+            else:
+                basic_cell = tf.nn.rnn_cell.DropoutWrapper(
+                tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
                     output_keep_prob=self.keep_prob)
             # stack cells together : n layered model
             stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([basic_cell]*num_layers, state_is_tuple=True)
@@ -65,27 +69,35 @@ class Seq2Seq(object):
             sys.stdout.write('<log> Building Actual model ')
             with tf.variable_scope('decoder') as scope:
                 # build the seq2seq model 
-                #  inputs : encoder, decoder inputs, LSTM cell type, vocabulary sizes, embedding dimensions
-                self.decode_outputs, self.decode_states = tf.nn.seq2seq.embedding_rnn_seq2seq(self.enc_ip,self.dec_ip, stacked_lstm,
+                if  self.attention == True:
+                    self.decode_outputs, self.decode_states = tf.nn.seq2seq.embedding_attention_seq2seq(self.enc_ip,self.dec_ip, stacked_lstm,
                                                     xvocab_size, yvocab_size, emb_dim)
                 # share parameters
-                scope.reuse_variables()
+                    scope.reuse_variables()
                 # testing model, where output of previous timestep is fed as input 
                 #  to the next timestep
-                self.decode_outputs_test, self.decode_states_test = tf.nn.seq2seq.embedding_rnn_seq2seq(
-                   self.enc_ip, self.dec_ip, stacked_lstm, xvocab_size, yvocab_size,emb_dim,
-                    feed_previous=True)
-
-            # now, for training,
-            #  build loss function
+                    self.decode_outputs_test, self.decode_states_test = tf.nn.seq2seq.embedding_attention_seq2seq(
+                            self.enc_ip, self.dec_ip, stacked_lstm, xvocab_size, yvocab_size,emb_dim,
+                            feed_previous=True)
+                else:
+                    self.decode_outputs, self.decode_states = tf.nn.seq2seq.embedding_rnn_seq2seq(self.enc_ip,self.dec_ip, stacked_lstm,
+                                                    xvocab_size, yvocab_size, emb_dim)
+                # share parameters
+                    scope.reuse_variables()
+                # testing model, where output of previous timestep is fed as input 
+                #  to the next timestep
+                    self.decode_outputs_test, self.decode_states_test = tf.nn.seq2seq.embedding_rnn_seq2seq(
+                            self.enc_ip, self.dec_ip, stacked_lstm, xvocab_size, yvocab_size,emb_dim,
+                            feed_previous=True)
+            
 
             # weighted loss
-            #  TODO : add parameter hint
-            sys.stdout.write('<log> Building optimizer ADAM ')
+            
+            sys.stdout.write('GradientDescentOptimizer.. ')
             loss_weights = [ tf.ones_like(label, dtype=tf.float32) for label in self.labels ]
             self.loss = tf.nn.seq2seq.sequence_loss(self.decode_outputs, self.labels, loss_weights, yvocab_size)
             # train op to minimize the loss
-            self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.loss)
+            self.train_op = tf.train.GradientDescentOptimizer(learning_rate=lr).minimize(self.loss)
 
         sys.stdout.write('<log> Building Graph ')
         # build comput graph
@@ -117,7 +129,7 @@ class Seq2Seq(object):
     def eval_step(self, sess, eval_batch_gen):
         # get batches
         batchX, batchY = eval_batch_gen.next()
-        sys.stdout.write( "Evaluating size")
+       
         # build feed
         feed_dict = self.get_feed(batchX, batchY, keep_prob=1.)
         loss_v, dec_op_v = sess.run([self.loss, self.decode_outputs_test], feed_dict)
@@ -156,7 +168,7 @@ class Seq2Seq(object):
         for i in range(self.epochs):
             try:
                 self.train_batch(sess, train_set)
-                if i and i% (self.epochs // 5) == 0: # TODO : make this tunable by the user
+                if i and i% (self.epochs // 1) == 0: 
                     # save model to disk
                     saver.save(sess, self.ckpt_path + self.model_name + '.ckpt', global_step=i)
                     # evaluate to get validation loss

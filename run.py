@@ -117,7 +117,7 @@ def train():
             ckpt_paths = 'ckpt/checkpoint/LSTM'
     print "Check if model exist already to retrieve"
     val_batch_gen = helpers.rand_batch_gen(validX, validY, 2)
-    train_batch_gen = helpers.rand_batch_gen(trainX, trainY, batch_size)
+    train_batch_gen = helpers.rand_batch_gen(trainX, trainY, FLAGS.batch_size)
     ckpt = tf.train.get_checkpoint_state(ckpt_paths)
     if ckpt and tf.gfile.Exists(ckpt.model_checkpoint_path):
         print("Reading model parameters from %s" % ckpt.model_checkpoint_path)

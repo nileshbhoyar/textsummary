@@ -93,11 +93,11 @@ class Seq2Seq(object):
 
             # weighted loss
             
-            sys.stdout.write('GradientDescentOptimizer.. ')
+            sys.stdout.write('.AdamOptimizer.. ')
             loss_weights = [ tf.ones_like(label, dtype=tf.float32) for label in self.labels ]
             self.loss = tf.nn.seq2seq.sequence_loss(self.decode_outputs, self.labels, loss_weights, yvocab_size)
             # train op to minimize the loss
-            self.train_op = tf.train.GradientDescentOptimizer(learning_rate=lr).minimize(self.loss)
+            self.train_op = tf.train..AdamOptimizer(learning_rate=lr).minimize(self.loss)
 
         sys.stdout.write('<log> Building Graph ')
         # build comput graph

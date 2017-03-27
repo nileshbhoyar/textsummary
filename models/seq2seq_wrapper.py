@@ -54,14 +54,15 @@ class Seq2Seq(object):
             # Basic LSTM cell wrapped in Dropout Wrapper
             self.keep_prob = tf.placeholder(tf.float32)
             # define the basic cell
-            if self.celltype == 'GRU' :
-                basic_cell = tf.nn.rnn_cell.DropoutWrapper(tf.nn.rnn_cell.GRUCell(emb_dim),output_keep_prob=self.keep_prob)
-            else:
-                basic_cell = tf.nn.rnn_cell.DropoutWrapper(
-                tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
+            with tf.variable_scope('decoder', reuse=True):
+                if self.celltype == 'GRU' :
+                    basic_cell = tf.nn.rnn_cell.DropoutWrapper(tf.nn.rnn_cell.GRUCell(emb_dim),output_keep_prob=self.keep_prob)
+                else:
+                    basic_cell = tf.nn.rnn_cell.DropoutWrapper(
+                        tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
                     output_keep_prob=self.keep_prob)
             # stack cells together : n layered model
-            stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([basic_cell]*num_layers, state_is_tuple=True)
+                stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([basic_cell]*num_layers, state_is_tuple=True)
 
 
             # for parameter sharing between training model
@@ -97,7 +98,7 @@ class Seq2Seq(object):
             loss_weights = [ tf.ones_like(label, dtype=tf.float32) for label in self.labels ]
             self.loss = tf.nn.seq2seq.sequence_loss(self.decode_outputs, self.labels, loss_weights, yvocab_size)
             # train op to minimize the loss
-            self.train_op = tf.train..AdamOptimizer(learning_rate=lr).minimize(self.loss)
+            self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.loss)
 
         sys.stdout.write('<log> Building Graph ')
         # build comput graph
@@ -168,7 +169,7 @@ class Seq2Seq(object):
         for i in range(self.epochs):
             try:
                 self.train_batch(sess, train_set)
-                if i and i% (self.epochs // 1) == 0: 
+                if i and i% (self.epochs // 100) == 0: 
                     # save model to disk
                     saver.save(sess, self.ckpt_path + self.model_name + '.ckpt', global_step=i)
                     # evaluate to get validation loss

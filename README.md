@@ -50,3 +50,4 @@ GRU without Attention
 ```
  python run.py --decode True -attention False --celltype GRU
 ```
+We have also provided Ipython notebooks that gives some introduction to what is there in all .py files.

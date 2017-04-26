@@ -18,11 +18,7 @@ import string
 from nltk.corpus import stopwords
 EN_WHITELIST = '0123456789abcdefghijklmnopqrstuvwxyz ' # space is included in whitelist
 EN_BLACKLIST = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\''
-<<<<<<< HEAD
 MAX_REVIEWS = 4000000
-=======
-MAX_REVIEWS = 12000
->>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
 
 #FILENAME = '/Users/nileshbhoyar/Documents/W266Project/data/finefoods.txt'
 
@@ -33,11 +29,7 @@ limit = {
         'minsummary' : 3
         }
 UNK = 'unk'
-<<<<<<< HEAD
 VOCAB_SIZE = 2000000
-=======
-VOCAB_SIZE = 400000
->>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
 ##
 def get_tokens(text ):
     lowers = text.lower()
@@ -109,28 +101,20 @@ def pad_seq(seq, lookup, maxlen):
    
 def zero_pad_single(itokens,w2idx):
      # num of rows
-<<<<<<< HEAD
         print "Format input"
         #q_indices = pad_seq(itokens, w2idx, limit['maxreview'])
         q_indices = pad_seq(itokens, w2idx, 200)
     # numpy arrays to store indices
         #idx_review = np.zeros([1, limit['maxreview']], dtype=np.int32) 
         idx_review = np.zeros([1, 200], dtype=np.int32) 
-=======
-        q_indices = pad_seq(itokens, w2idx, 80)
-        
-    # numpy arrays to store indices
-        idx_review = np.zeros([1, 80], dtype=np.int32) 
->>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
         idx_review[0] = np.array(q_indices)
         return idx_review
 #zero pad
 def zero_pad(qtokenized, atokenized, w2idx):
     # num of rows
         data_len = len(qtokenized)
-        limit_len = 80
+
     # numpy arrays to store indices
-<<<<<<< HEAD
         #idx_review = np.zeros([data_len, limit['maxreview']], dtype=np.int32) 
         #idx_summary = np.zeros([data_len, limit['maxsummary']], dtype=np.int32)
         idx_review = np.zeros([data_len, 200], dtype=np.int32) 
@@ -140,21 +124,22 @@ def zero_pad(qtokenized, atokenized, w2idx):
             #a_indices = pad_seq(atokenized[i], w2idx, limit['maxsummary'])
             q_indices = pad_seq(qtokenized[i], w2idx, 200)
             a_indices = pad_seq(atokenized[i], w2idx, 30)
-=======
-        idx_review = np.zeros([data_len, limit_len], dtype=np.int32) 
-        idx_summary = np.zeros([data_len, 30], dtype=np.int32)
-
-        for i in range(data_len):
-            q_indices = pad_seq(qtokenized[i], w2idx, limit_len)
-            a_indices = pad_seq(atokenized[i], w2idx, 30)
-
->>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
         #print(len(idx_q[i]), len(q_indices))
         #print(len(idx_a[i]), len(a_indices))
             idx_review[i] = np.array(q_indices)
             idx_summary[i] = np.array(a_indices)
 
         return idx_review, idx_summary
+def split_dataset(x, y, ratio = [0.7, 0.15, 0.15] ):
+    # number of examples
+    data_len = len(x)
+    lens = [ int(data_len*item) for item in ratio ]
+
+    trainX, trainY = x[:lens[0]], y[:lens[0]]
+    testX, testY = x[lens[0]:lens[0]+lens[1]], y[lens[0]:lens[0]+lens[1]]
+    validX, validY = x[-lens[-1]:], y[-lens[-1]:]
+
+    return (trainX,trainY), (testX,testY), (validX,validY)
 
 def filter_data(sequences):
     filtered_q, filtered_a = [], []
@@ -179,12 +164,7 @@ def filter_data(sequences):
                 #filtered_a.append(sequences.iloc[i]['Summary'])
                 filtered_q.append(fqtokens[0:200])
                 filtered_a.append(fatokens[0:30])
-<<<<<<< HEAD
                 
-=======
-               
-               
->>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
         
         #print fatokens
     # print the fraction of the original data, filtered
@@ -230,9 +210,13 @@ def process_data():
     # save them
     #np.save('/Users/nileshbhoyar/Documents/W266Project/datasets/idx_review.npy', idx_q)
     #np.save('/Users/nileshbhoyar/Documents/W266Project/datasets/idx_summary.npy', idx_a)
-    
-    np.save('datasets/idx_review.npy', idx_q)
-    np.save('datasets/idx_summary.npy', idx_a)
+    (trainX, trainY), (testX, testY), (validX, validY) = split_dataset(idx_q, idx_a)
+    np.save('datasets/idx_review.npy', trainX)
+    np.save('datasets/idx_summary.npy', trainY)
+    np.save('datasets/test_review.npy', testX)
+    np.save('datasets/test_summary.npy', testY)
+    np.save('datasets/valid_review.npy', validX)
+    np.save('datasets/valid_summary.npy', validY)
     # let us now save the necessary dictionaries
     metadata = {
             'w2idx' : w2idx,

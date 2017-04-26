@@ -18,18 +18,18 @@ import string
 from nltk.corpus import stopwords
 EN_WHITELIST = '0123456789abcdefghijklmnopqrstuvwxyz ' # space is included in whitelist
 EN_BLACKLIST = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\''
-MAX_REVIEWS = 40000
+MAX_REVIEWS = 4000000
 
 #FILENAME = '/Users/nileshbhoyar/Documents/W266Project/data/finefoods.txt'
 
 limit = {
-        'maxreview' : 500,
+        'maxreview' : 2000,
         'minreview' : 0,
-        'maxsummary' : 30,
+        'maxsummary' : 300,
         'minsummary' : 3
         }
 UNK = 'unk'
-VOCAB_SIZE = 100000
+VOCAB_SIZE = 2000000
 ##
 def get_tokens(text ):
     lowers = text.lower()
@@ -99,12 +99,14 @@ def pad_seq(seq, lookup, maxlen):
                indices.append(lookup[UNK])
        return indices + [0]*(maxlen - len(seq))
    
-def zero_pad_single(itokens,w2dx):
+def zero_pad_single(itokens,w2idx):
      # num of rows
-        q_indices = pad_seq(itokens, w2idx, limit['maxreview'])
-        dx_review = np.zeros([1, limit['maxreview']], dtype=np.int32)
+        print "Format input"
+        #q_indices = pad_seq(itokens, w2idx, limit['maxreview'])
+        q_indices = pad_seq(itokens, w2idx, 200)
     # numpy arrays to store indices
-        idx_review = np.zeros([data_len, limit['maxreview']], dtype=np.int32) 
+        #idx_review = np.zeros([1, limit['maxreview']], dtype=np.int32) 
+        idx_review = np.zeros([1, 200], dtype=np.int32) 
         idx_review[0] = np.array(q_indices)
         return idx_review
 #zero pad
@@ -113,13 +115,15 @@ def zero_pad(qtokenized, atokenized, w2idx):
         data_len = len(qtokenized)
 
     # numpy arrays to store indices
-        idx_review = np.zeros([data_len, limit['maxreview']], dtype=np.int32) 
-        idx_summary = np.zeros([data_len, limit['maxsummary']], dtype=np.int32)
-
+        #idx_review = np.zeros([data_len, limit['maxreview']], dtype=np.int32) 
+        #idx_summary = np.zeros([data_len, limit['maxsummary']], dtype=np.int32)
+        idx_review = np.zeros([data_len, 200], dtype=np.int32) 
+        idx_summary = np.zeros([data_len, 30], dtype=np.int32)
         for i in range(data_len):
-            q_indices = pad_seq(qtokenized[i], w2idx, limit['maxreview'])
-            a_indices = pad_seq(atokenized[i], w2idx, limit['maxsummary'])
-
+            #q_indices = pad_seq(qtokenized[i], w2idx, limit['maxreview'])
+            #a_indices = pad_seq(atokenized[i], w2idx, limit['maxsummary'])
+            q_indices = pad_seq(qtokenized[i], w2idx, 200)
+            a_indices = pad_seq(atokenized[i], w2idx, 30)
         #print(len(idx_q[i]), len(q_indices))
         #print(len(idx_a[i]), len(a_indices))
             idx_review[i] = np.array(q_indices)
@@ -148,10 +152,9 @@ def filter_data(sequences):
                 fatokens =  [w for w in atokens if not w in stopwords.words('english')]
                 #filtered_q.append(sequences.iloc[i]['Review'])
                 #filtered_a.append(sequences.iloc[i]['Summary'])
-                filtered_q.append(fqtokens[0:80])
+                filtered_q.append(fqtokens[0:200])
                 filtered_a.append(fatokens[0:30])
-                if len(filtered_q) > 10:
-                    break
+                
         
         #print fatokens
     # print the fraction of the original data, filtered
@@ -174,7 +177,22 @@ def process_data():
     #atokenized = [ wordlist.split(' ') for wordlist in ndf['Summary'] ]
     print('Index words.....')
     #idx2w, w2idx, freq_dist = index_( qtokenized + atokenized, vocab_size=VOCAB_SIZE)
-    idx2w, w2idx, freq_dist = index_( qlines + alines, vocab_size=VOCAB_SIZE)
+    sum_lst = []
+    rev_lst = []
+    with open(FILENAME) as infile:
+            for line in infile:
+                if line.startswith('review/text'):
+                    _,review = line.split('/text: ')
+                    rev_lst.append(nltk.wordpunct_tokenize(review))
+                if line.startswith('review/summary'):
+                   
+                    _,summary = line.split('/summary: ')
+                    sum_lst.append(nltk.wordpunct_tokenize(summary))
+    
+
+                                         
+    #idx2w, w2idx, freq_dist = index_( qlines + alines, vocab_size=VOCAB_SIZE)
+    idx2w, w2idx, freq_dist = index_( rev_lst + sum_lst, vocab_size=VOCAB_SIZE)
     print('Zero Padding.....')
     #idx_q, idx_a = zero_pad(qtokenized, atokenized, w2idx)
     idx_q, idx_a = zero_pad(qlines, alines, w2idx)
@@ -205,6 +223,12 @@ def load_data(PATH=''):
     idx_q = np.load(PATH + 'datasets/idx_review.npy')
     idx_a = np.load(PATH + 'datasets/idx_summary.npy')
     return metadata, idx_q, idx_a
+def load_metadata(PATH=''):
+    # read data control dictionaries
+    with open(PATH + 'datasets/metadata.pkl', 'rb') as f:
+        metadata = pickle.load(f)
+
+    return metadata
 if __name__ == '__main__':
     #args = sys.argv
     #inputfile = args[1]

@@ -55,12 +55,21 @@ class Seq2Seq(object):
             self.keep_prob = tf.placeholder(tf.float32)
             with tf.variable_scope('decoder', reuse=True):
             # define the basic cell
+<<<<<<< HEAD
+=======
+            with tf.variable_scope('decoder', reuse=True):
+>>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
                 if self.celltype == 'GRU' :
                     basic_cell = tf.nn.rnn_cell.DropoutWrapper(tf.nn.rnn_cell.GRUCell(emb_dim),output_keep_prob=self.keep_prob)
                 else:
                     basic_cell = tf.nn.rnn_cell.DropoutWrapper(
+<<<<<<< HEAD
                             tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
                                                     output_keep_prob=self.keep_prob)
+=======
+                        tf.nn.rnn_cell.BasicLSTMCell(emb_dim, state_is_tuple=True),
+                    output_keep_prob=self.keep_prob)
+>>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
             # stack cells together : n layered model
                 stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([basic_cell]*num_layers, state_is_tuple=True)
 
@@ -202,7 +211,11 @@ class Seq2Seq(object):
         for i in range(self.epochs):
             try:
                 self.train_batch(sess, train_set)
+<<<<<<< HEAD
                 if i and i% (self.epochs // 1000) == 0: 
+=======
+                if i and i% (self.epochs // 100) == 0: 
+>>>>>>> add20b511d02418c7637260abb87e9b0bc584fd4
                     # save model to disk
                     saver.save(sess, self.ckpt_path + self.model_name + '.ckpt', global_step=i)
                     # evaluate to get validation loss

@@ -50,4 +50,22 @@ GRU without Attention
 ```
  python run.py --decode True -attention False --celltype GRU
 ```
+
+## Running Test Files to Calculate Rogue-1, Bleu-1 and F1 Scores
+ LSTM with Attention
+```
+python run.py --decode False --self_test True --celltype GRU --attention True
+```
+GRU with Attention
+```
+python run.py --decode False --self_test True --celltype GRU --attention True
+```
+LSTM without Attention
+```
+python run.py --decode False --self_test True --celltype LSTM --attention False
+```
+GRU without Attention
+```
+python run.py --decode False --self_test True --celltype GRU --attention False
+```
 We have also provided Ipython notebooks that gives some introduction to what is there in all .py files.

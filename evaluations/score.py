@@ -28,7 +28,7 @@ def rouge_n(pred, refs, n = 1):
 
 # Precision: BLEU
 def bleu(pred, refs, n = 1):
-    m = len(ref)
+    m = len(refs)
     bleu_score = 0.0
     pred_grams = get_ngrams(pred, n)
     pred_grams_count = len(pred_grams)
@@ -59,7 +59,10 @@ def count_element(list, element):
 # https://en.wikipedia.org/wiki/F1_score
 # http://stackoverflow.com/questions/38045290/text-summarization-evaluation-bleu-vs-rouge
 def f1(rouge, bleu):
-    return 2 * (rouge * bleu) / (bleu + rouge)
+    if bleu + rouge == 0:
+        return 0
+    else:
+        2 * (rouge * bleu) / (bleu + rouge)
 
 
 

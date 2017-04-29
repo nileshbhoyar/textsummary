@@ -18,7 +18,7 @@ import string
 from nltk.corpus import stopwords
 EN_WHITELIST = '0123456789abcdefghijklmnopqrstuvwxyz ' # space is included in whitelist
 EN_BLACKLIST = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\''
-MAX_REVIEWS = 4000000
+MAX_REVIEWS = 1000000
 
 #FILENAME = '/Users/nileshbhoyar/Documents/W266Project/data/finefoods.txt'
 
@@ -29,7 +29,7 @@ limit = {
         'minsummary' : 3
         }
 UNK = 'unk'
-VOCAB_SIZE = 2000000
+VOCAB_SIZE = 20000
 ##
 def get_tokens(text ):
     lowers = text.lower()
@@ -103,10 +103,10 @@ def zero_pad_single(itokens,w2idx):
      # num of rows
         print "Format input"
         #q_indices = pad_seq(itokens, w2idx, limit['maxreview'])
-        q_indices = pad_seq(itokens, w2idx, 200)
+        q_indices = pad_seq(itokens, w2idx, 30)
     # numpy arrays to store indices
         #idx_review = np.zeros([1, limit['maxreview']], dtype=np.int32) 
-        idx_review = np.zeros([1, 200], dtype=np.int32) 
+        idx_review = np.zeros([1, 20], dtype=np.int32) 
         idx_review[0] = np.array(q_indices)
         return idx_review
 #zero pad
@@ -117,13 +117,13 @@ def zero_pad(qtokenized, atokenized, w2idx):
     # numpy arrays to store indices
         #idx_review = np.zeros([data_len, limit['maxreview']], dtype=np.int32) 
         #idx_summary = np.zeros([data_len, limit['maxsummary']], dtype=np.int32)
-        idx_review = np.zeros([data_len, 200], dtype=np.int32) 
-        idx_summary = np.zeros([data_len, 30], dtype=np.int32)
+        idx_review = np.zeros([data_len, 30], dtype=np.int32) 
+        idx_summary = np.zeros([data_len, 20], dtype=np.int32)
         for i in range(data_len):
             #q_indices = pad_seq(qtokenized[i], w2idx, limit['maxreview'])
             #a_indices = pad_seq(atokenized[i], w2idx, limit['maxsummary'])
-            q_indices = pad_seq(qtokenized[i], w2idx, 200)
-            a_indices = pad_seq(atokenized[i], w2idx, 30)
+            q_indices = pad_seq(qtokenized[i], w2idx, 30)
+            a_indices = pad_seq(atokenized[i], w2idx, 20)
         #print(len(idx_q[i]), len(q_indices))
         #print(len(idx_a[i]), len(a_indices))
             idx_review[i] = np.array(q_indices)
@@ -162,8 +162,8 @@ def filter_data(sequences):
                 fatokens =  [w for w in atokens if not w in stopwords.words('english')]
                 #filtered_q.append(sequences.iloc[i]['Review'])
                 #filtered_a.append(sequences.iloc[i]['Summary'])
-                filtered_q.append(fqtokens[0:200])
-                filtered_a.append(fatokens[0:30])
+                filtered_q.append(fqtokens[0:30])
+                filtered_a.append(fatokens[0:20])
                 
         
         #print fatokens

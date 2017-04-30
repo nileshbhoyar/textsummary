@@ -106,7 +106,7 @@ def zero_pad_single(itokens,w2idx):
         q_indices = pad_seq(itokens, w2idx, 30)
     # numpy arrays to store indices
         #idx_review = np.zeros([1, limit['maxreview']], dtype=np.int32) 
-        idx_review = np.zeros([1, 20], dtype=np.int32) 
+        idx_review = np.zeros([1, 30], dtype=np.int32) 
         idx_review[0] = np.array(q_indices)
         return idx_review
 #zero pad

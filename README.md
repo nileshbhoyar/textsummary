@@ -72,5 +72,5 @@ python run.py --decode False --self_test True --celltype GRU --attention False
 ## Example of model training
 
 [![LSTMwithAttentionModelTraining.png](https://s22.postimg.org/isl6ucd0h/LSTMwith_Attention_Model_Training.png)](https://postimg.org/image/t2nltl2vx/)
-
+[![LSTMnoAttentionModelTraining.png](https://s28.postimg.org/om4xtshml/LSTMno_Attention_Model_Training.png)](https://postimg.org/image/njurb8yt5/)
 We have also provided Ipython notebooks that gives some introduction to what is there in all .py files.

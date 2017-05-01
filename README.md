@@ -1,8 +1,8 @@
 # W266- Seq2seq Abstract Summarization
 We have implemented Recurrent Neural Network (LSTM and GRU units) for developing Seq2Seq Encoder Decoded model with and without attention mechanism for
 summarization of amazon food reviews into abstractive tips.
-## Data processing. 
-Amazon reviews can be downloaded from 
+## Data processing.
+Amazon reviews can be downloaded from
 <a href="https://snap.stanford.edu/data/web-FineFoods.html">here</a>
 first download dataset and unizp that file in folder data. if data folder does not exist then you will have to create it in your repo.
 
@@ -13,7 +13,7 @@ Once data is downloaded then execute data processing using command
 ```
 ## Execute Training
 
-Run model using run.py as below to 
+Run model using run.py as below to
 
 Train LSTM with Attention
 ```
@@ -25,7 +25,7 @@ Train GRU with Attention
 ```
 Train LSTM without Attention
 ```
- python run.py --decode False -attention False --celltype GRU
+ python run.py --decode False -attention False --celltype LSTM
 ```
 Train GRU without Attention
 ```
@@ -44,7 +44,7 @@ GRU with Attention
 ```
 LSTM without Attention
 ```
- python run.py --decode True -attention False --celltype GRU
+ python run.py --decode True -attention False --celltype LSTM
 ```
 GRU without Attention
 ```
@@ -52,9 +52,10 @@ GRU without Attention
 ```
 
 ## Running Test Files to Calculate Rogue-1, Bleu-1 and F1 Scores
+Before running, make sure you already created results folder
  LSTM with Attention
 ```
-python run.py --decode False --self_test True --celltype GRU --attention True
+python run.py --decode False --self_test True --celltype LSTM --attention True
 ```
 GRU with Attention
 ```
@@ -68,4 +69,7 @@ GRU without Attention
 ```
 python run.py --decode False --self_test True --celltype GRU --attention False
 ```
+## Example of model training
+![Alt text](/results/img.jpg?raw=true "LSTMwithAttentionModelTraining")
+
 We have also provided Ipython notebooks that gives some introduction to what is there in all .py files.
